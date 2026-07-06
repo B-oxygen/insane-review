@@ -1,6 +1,10 @@
-[English](README.md) | 한국어
+[English](README.md) | 한국어 | [中文](README.zh.md) | [日本語](README.ja.md) | [Español](README.es.md)
 
 # insane-review
+
+<div align="center">
+  <img src="assets/hero.png" width="860" alt="insane-review 시네마틱 히어로">
+</div>
 
 > **GPT-5.5 Pro는 API가 없다. 그래도 Claude Code 안에서 쓴다.**
 
