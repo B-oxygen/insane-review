@@ -1410,7 +1410,7 @@ def main():
             if saved:
                 r = resolve_browser(saved)   # 인자 지정 경로 → 첫감지 폴백 없음(저장값-only)
                 if r:
-                    launch_browser_exe(r[1])
+                    launch_browser_exe(r[1], r[0])
         sys.exit(check_env(do_install=args.install))
 
     if args.list_browsers:
@@ -1428,7 +1428,7 @@ def main():
             avail = ", ".join(n for n, _ in detect_browsers()) or "없음"
             sys.exit(f"❌ 브라우저를 찾지 못함 (지정='{args.launch_browser}', 감지=[{avail}])")
         name, path = resolved
-        if launch_browser_exe(path):
+        if launch_browser_exe(path, name):
             save_browser_choice(name)
             print(f"STATUS_LAUNCH ok browser={name}")
             sys.exit(0)

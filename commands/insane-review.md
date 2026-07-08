@@ -35,7 +35,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/bin/pack_and_ask.py" --ensure-env
 
 `--ensure-env`는 **저장된 브라우저가 있고 CDP가 닫혀 있으면 조용히 1회 자동 기동**한 뒤 상태를 보고한다
 (저장값-only·첫감지 폴백 없음, `browser=wrong`이면 자동기동 안 함). **즉 최초 1회 온보딩 이후엔 브라우저를 다시 묻지 않고 알아서 뜬다.**
-마지막 줄 `STATUS node=… deps=… browser=… login=… saved_browser=…`을 파싱한다. **전부 ok가 아니면**, 막힌 첫 단계를 아래처럼
+마지막 줄 `STATUS node=… deps=… browser=… login=… cookie=… cookie_exp=… saved_browser=…`을 파싱한다. **전부 ok가 아니면**, 막힌 첫 단계를 아래처럼
 AskUserQuestion으로 물어보고 → 선택대로 Claude가 실행 → `--ensure-env`를 다시 돌려 재확인한다(최대 3~4회 반복).
 
 - **`deps=missing`** → AskUserQuestion(header `의존성`):
@@ -61,9 +61,12 @@ AskUserQuestion으로 물어보고 → 선택대로 Claude가 실행 → `--ensu
     - "취소"
   - **0개 감지** → AskUserQuestion(header `브라우저`): "크로미움 계열 브라우저가 없습니다 — 설치할까요?" → ["Chrome 설치 안내"/"취소"]
 - **`browser=wrong`**(포트 점유) → AskUserQuestion(header `포트충돌`): "9222를 다른 프로세스가 쓰고 있어요. 종료하고 전용 브라우저를 다시 띄울까요?" → ["다시 띄우기"(점유 프로세스 종료 안내 후 `--launch-browser`)/"취소"]
-- **`login=no`** → AskUserQuestion(header `로그인`): "방금 띄운 **전용 브라우저 창**에서 **chatgpt.com 로그인 + Pro 추론(최신 플래그십 모델) 선택**을 끝낸 뒤 계속하세요. (전용 프로필이라 이 로그인은 계속 유지됩니다.)"
+- **`login=no`** (로그인 벽이 실제로 확인된 경우에만 나온다) → AskUserQuestion(header `로그인`): "방금 띄운 **전용 브라우저 창**에서 **chatgpt.com 로그인 + Pro 추론(최신 플래그십 모델) 선택**을 끝낸 뒤 계속하세요. (전용 프로필이라 이 로그인은 계속 유지됩니다.)"
   - "로그인 완료 — 계속" → `--ensure-env` 재확인
   - "취소"
+- **`login=unknown`** (컴포저·로그인 벽 모두 미확인 — 로딩 지연/CF 챌린지 가능. **로그인을 요구하지 말 것**):
+  - `cookie=ok`면 세션은 살아있는 것 → `--ensure-env`를 1~2회 재실행해 재점검. 계속 unknown이면 사용자에게 "전용 브라우저 창에 챌린지/오류 화면이 떠 있는지 확인" 요청 (재로그인 아님).
+  - `cookie=missing|expired`면 그때만 위 `login=no` 분기와 동일하게 로그인 안내.
 - **`node=missing`** → AskUserQuestion(header `Node`): "Node.js가 필요합니다(repomix 자동설치에 사용). 설치를 도와드릴까요?" → ["brew로 설치"/"직접 설치할게요"/"취소"] (brew 선택 시 `brew install node`)
 
 `STATUS … login=ok`까지 가면 Step 1로. 사용자가 "취소"하면 멈추고 무엇이 남았는지 한 줄로 알려준다.
