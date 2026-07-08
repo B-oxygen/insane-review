@@ -79,7 +79,7 @@ AskUserQuestion으로 물어보고 → 선택대로 Claude가 실행 → `--ensu
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/bin/pack_and_ask.py" \
      --target <repo_or_dir> --include "<관련 파일 글롭 또는 생략=전체>" \
-     --model pro --require-model "GPT-5.5" \
+     --model pro \
      --prompt "<의도 담은 질문 — 판정마다 파일:라인·코드조각 인용 강제>"
    ```
    - 응답이 오래 걸려도 되면 그대로(완전추론). 시간을 bound하고 싶으면 `--force-answer-after <초>`로

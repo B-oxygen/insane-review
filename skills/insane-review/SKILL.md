@@ -18,7 +18,7 @@ description: GPT-5.5 Pro(웹 전용·API 없음)를 Claude Code 안에서 활용
 - **deps**(`playwright`·`pyperclip`): 없으면 "지금 자동 설치" 선택 → `--check-env --install`. (`npx`/repomix는 `npx -y`로 완전 자동.)
 - **browser**: 크로미움 계열 브라우저가 디버그포트(9222)에 **전용 프로필**로 떠 있어야 함(주 브라우저와 격리; Chrome 136+는 전용 프로필 없으면 CDP가 안 열림). 없으면 `--check-env`의 `BROWSERS …` 목록으로 브라우저를 고르게 한 뒤 Claude가 `pack_and_ask.py --launch-browser "<이름>"`(크로스플랫폼 mac/win/linux·전용 프로필·선택 자동 저장)을 실행. 1개뿐이면 전용 브라우저 1개 설치를 권장. (쿠키는 전용 프로필에 보존 → 로그인 유지.)
 - **login**: `--check-env`의 로그인 프로브가 `login=no`면, "방금 연 브라우저에서 chatgpt.com 로그인 + GPT-5.5 Pro 선택" 후 "로그인 완료" 선택 → 재점검. **로그인은 자동 불가 → 반드시 사용자에게 요청**(에러로 끝내지 말 것).
-- **모델 5.5 Pro**: 스크립트 `--model pro`가 자동선택·검증(`--require-model "GPT-5.5"`). 안 되면 사용자가 1회 수동 설정하면 새 채팅이 상속.
+- **모델 Pro 티어**: 스크립트 `--model pro`가 추론단계 **Pro**를 자동선택·검증한다. Pro 티어는 플래그십 모델에만 존재하므로, 모델명을 못박지 않아도 "현 최신 플래그십 + 최대 추론"이 보장된다(GPT 버전이 올라가도 자동 추종). 안 되면 사용자가 1회 수동 설정하면 새 채팅이 상속. (특정 모델명으로 고정하려면 `--require-model "<이름>"` 옵션을 추가.)
 
 ## 핵심 절차 (검토/수정/리뷰 요청을 받았을 때)
 
@@ -38,7 +38,7 @@ description: GPT-5.5 Pro(웹 전용·API 없음)를 Claude Code 안에서 활용
 ```bash
 python3 <plugin>/bin/pack_and_ask.py \
   --target <repo_root> --include "<관련 파일 글롭>" \
-  --model pro --require-model "GPT-5.5" \
+  --model pro \
   --prompt "<의도를 담은 정확한 질문 — '판정마다 파일/라인/코드조각을 인용하라'를 반드시 포함>"
 ```
 또는 정확한 파일 목록을 직접 줄 때(레포를 cwd로):
@@ -69,7 +69,7 @@ python3 <plugin>/bin/pack_and_ask.py --model pro --force-answer-after 90 \
 - **git submodule**: 부모 레포 루트에서 서브모듈 파일은 repomix가 제외한다. 서브모듈 안에서 실행하거나 `--target <submodule>` 또는 `--no-gitignore --no-default-patterns`.
 - **압축은 코드 파일만** 줄인다(마크다운/문서 위주 폴더엔 무효).
 - **정밀 리뷰엔 `--force-answer-after`를 쓰지 마라** — Pro 추론을 중간에 끊어 "다 생각 안 한 채" 답하게 만든다(gjc 지적, fail-open과 곱해져 미완성 답을 정답 저장). 완전 추론이 더 정확. 안전장치는 `--max-wait`(기본 20분, env/`--max-wait`로 조절)만. force-answer는 빠른 의견·짧은 질문에만.
-- **fail-closed**: 첨부 미확인 / 모델 미검증(`--require-model`) / timeout·빈 응답은 **성공 저장 안 하고 중단·재시도**한다(잘못된 컨텍스트나 미완성 답을 리뷰로 저장하지 않음).
+- **fail-closed**: 첨부 미확인 / 모델·추론단계 미검증(`--model pro` 검증 실패, 또는 `--require-model` 사용 시 모델명 불일치) / timeout·빈 응답은 **성공 저장 안 하고 중단·재시도**한다(잘못된 컨텍스트나 미완성 답을 리뷰로 저장하지 않음).
 - 큰 콘텐츠는 **파일 첨부**로 들어간다(붙여넣기 X). 스크립트가 자동 처리.
 - 실패 시 `--retries N`으로 전송/회수를 재시도.
 
