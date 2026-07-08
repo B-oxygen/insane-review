@@ -1,11 +1,11 @@
 ---
 name: insane-review
-description: GPT-5.5 Pro(웹 전용·API 없음)를 Claude Code 안에서 활용한다. 사용자가 검토/수정/문제/리뷰/의견을 요청하면, 의도를 파악해 repomix로 관련 코드만 정밀 패킹한 뒤 구독 ChatGPT Pro에 투입하고 분석을 회수해 반영한다. 트리거 — "GPT한테 물어봐", "Pro 모델 의견", "다른 모델로 검토해줘", "GPT Pro로 리뷰", "repomix로 묶어서 GPT에 넣어줘", "GPT는 어떻게 생각해", "ask gpt pro", "second opinion". agent-council의 웹 전용 멤버로도 동작.
+description: GPT Pro(웹 전용·API 없음 — 현 시점 최신 플래그십 모델의 Pro 추론)를 Claude Code 안에서 활용한다. 사용자가 검토/수정/문제/리뷰/의견을 요청하면, 의도를 파악해 repomix로 관련 코드만 정밀 패킹한 뒤 구독 ChatGPT Pro에 투입하고 분석을 회수해 반영한다. 트리거 — "GPT한테 물어봐", "Pro 모델 의견", "다른 모델로 검토해줘", "GPT Pro로 리뷰", "repomix로 묶어서 GPT에 넣어줘", "GPT는 어떻게 생각해", "ask gpt pro", "second opinion". agent-council의 웹 전용 멤버로도 동작.
 ---
 
 # insane-review
 
-**왜 존재하나:** GPT-5.5 Pro는 **웹(구독)에서만** 쓸 수 있고 **API가 없다.** 그래서 Codex CLI·`omc ask`·agent-council의 기존 API provider로는 못 부른다. 이 스킬은 **구독 ChatGPT 웹을 자동화해 Pro를 Claude Code 안으로 끌어오는 유일한 경로**다. API 비용 0, 사용자의 요금제로 동작.
+**왜 존재하나:** GPT Pro(최신 플래그십 모델의 Pro 추론)는 **웹(구독)에서만** 쓸 수 있고 **API가 없다.** 그래서 Codex CLI·`omc ask`·agent-council의 기존 API provider로는 못 부른다. 이 스킬은 **구독 ChatGPT 웹을 자동화해 Pro를 Claude Code 안으로 끌어오는 유일한 경로**다. API 비용 0, 사용자의 요금제로 동작.
 
 핵심 가치는 "통째 패킹"이 아니라 **"의도 파악 → 관련 타겟만 정밀 선별 → 그것만 패킹"** 이다. 이 선별을 Claude(너)가 수행하는 것이 이 도구의 차별점이다.
 
@@ -17,7 +17,7 @@ description: GPT-5.5 Pro(웹 전용·API 없음)를 Claude Code 안에서 활용
 
 - **deps**(`playwright`·`pyperclip`): 없으면 "지금 자동 설치" 선택 → `--check-env --install`. (`npx`/repomix는 `npx -y`로 완전 자동.)
 - **browser**: 크로미움 계열 브라우저가 디버그포트(9222)에 **전용 프로필**로 떠 있어야 함(주 브라우저와 격리; Chrome 136+는 전용 프로필 없으면 CDP가 안 열림). 없으면 `--check-env`의 `BROWSERS …` 목록으로 브라우저를 고르게 한 뒤 Claude가 `pack_and_ask.py --launch-browser "<이름>"`(크로스플랫폼 mac/win/linux·전용 프로필·선택 자동 저장)을 실행. 1개뿐이면 전용 브라우저 1개 설치를 권장. (쿠키는 전용 프로필에 보존 → 로그인 유지.)
-- **login**: `--check-env`의 로그인 프로브가 `login=no`면, "방금 연 브라우저에서 chatgpt.com 로그인 + GPT-5.5 Pro 선택" 후 "로그인 완료" 선택 → 재점검. **로그인은 자동 불가 → 반드시 사용자에게 요청**(에러로 끝내지 말 것).
+- **login**: `--check-env`의 로그인 프로브가 `login=no`면, "방금 연 브라우저에서 chatgpt.com 로그인 + Pro 추론 선택" 후 "로그인 완료" 선택 → 재점검. **로그인은 자동 불가 → 반드시 사용자에게 요청**(에러로 끝내지 말 것).
 - **모델 Pro 티어**: 스크립트 `--model pro`가 추론단계 **Pro**를 자동선택·검증한다. Pro 티어는 플래그십 모델에만 존재하므로, 모델명을 못박지 않아도 "현 최신 플래그십 + 최대 추론"이 보장된다(GPT 버전이 올라가도 자동 추종). 안 되면 사용자가 1회 수동 설정하면 새 채팅이 상속. (특정 모델명으로 고정하려면 `--require-model "<이름>"` 옵션을 추가.)
 
 ## 핵심 절차 (검토/수정/리뷰 요청을 받았을 때)
@@ -62,7 +62,7 @@ python3 <plugin>/bin/pack_and_ask.py --model pro --force-answer-after 90 \
 
 ### 4) 회수 & 반영
 - 응답은 **현재 프로젝트의 `.insane-review/response_*.md`**에 저장되고, stdout 끝에 미리보기가 나온다.
-- 그 의견을 읽고 **GPT-5.5 Pro의 의견임을 명시**하여 사용자에게 반영/요약한다. 동의/이견을 너의 판단과 함께 제시하라.
+- 그 의견을 읽고 **GPT Pro의 의견임을 명시**하여 사용자에게 반영/요약한다(모델명은 리포트 상단 `- 모델:` 라인의 실제 검증된 이름을 인용). 동의/이견을 너의 판단과 함께 제시하라.
 
 ## 주의/가드 (실측 기반)
 

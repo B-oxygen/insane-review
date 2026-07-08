@@ -1,10 +1,10 @@
 ---
-description: GPT-5.5 Pro(웹 전용)에게 repomix로 패킹한 코드/질문을 보내 의견을 받아온다
+description: GPT Pro(웹 전용, 최신 플래그십)에게 repomix로 패킹한 코드/질문을 보내 의견을 받아온다
 ---
 
 # /insane-review
 
-사용자의 요청(`$ARGUMENTS`)을 GPT-5.5 Pro(구독 웹)에게 보내 분석/의견을 받아 반영한다.
+사용자의 요청(`$ARGUMENTS`)을 GPT Pro(구독 웹 — 현 시점 최신 플래그십 모델의 Pro 추론)에게 보내 분석/의견을 받아 반영한다.
 
 > **원칙: 사용자에게 CLI 타이핑을 시키지 않는다.** 환경이 안 갖춰졌으면 Claude가 `--check-env`로 감지하고,
 > 필요한 결정은 **AskUserQuestion 선택지**로 물어본 뒤 Claude가 대신 실행한다. 초보자도 클릭만으로 따라올 수 있어야 한다.
@@ -61,7 +61,7 @@ AskUserQuestion으로 물어보고 → 선택대로 Claude가 실행 → `--ensu
     - "취소"
   - **0개 감지** → AskUserQuestion(header `브라우저`): "크로미움 계열 브라우저가 없습니다 — 설치할까요?" → ["Chrome 설치 안내"/"취소"]
 - **`browser=wrong`**(포트 점유) → AskUserQuestion(header `포트충돌`): "9222를 다른 프로세스가 쓰고 있어요. 종료하고 전용 브라우저를 다시 띄울까요?" → ["다시 띄우기"(점유 프로세스 종료 안내 후 `--launch-browser`)/"취소"]
-- **`login=no`** → AskUserQuestion(header `로그인`): "방금 띄운 **전용 브라우저 창**에서 **chatgpt.com 로그인 + GPT-5.5 Pro 선택**을 끝낸 뒤 계속하세요. (전용 프로필이라 이 로그인은 계속 유지됩니다.)"
+- **`login=no`** → AskUserQuestion(header `로그인`): "방금 띄운 **전용 브라우저 창**에서 **chatgpt.com 로그인 + Pro 추론(최신 플래그십 모델) 선택**을 끝낸 뒤 계속하세요. (전용 프로필이라 이 로그인은 계속 유지됩니다.)"
   - "로그인 완료 — 계속" → `--ensure-env` 재확인
   - "취소"
 - **`node=missing`** → AskUserQuestion(header `Node`): "Node.js가 필요합니다(repomix 자동설치에 사용). 설치를 도와드릴까요?" → ["brew로 설치"/"직접 설치할게요"/"취소"] (brew 선택 시 `brew install node`)
@@ -85,8 +85,8 @@ AskUserQuestion으로 물어보고 → 선택대로 Claude가 실행 → `--ensu
    - 응답이 오래 걸려도 되면 그대로(완전추론). 시간을 bound하고 싶으면 `--force-answer-after <초>`로
      "거기까지 추론한 내용으로" 답을 받는다. 단독 리뷰는 보통 끄고(완전추론), council은 켜서 cap.
 4. **누락 확인** — 출력의 `📦 패킹 포함 N개 파일`이 의도한 완전한 집합을 담았는지 확인(빠지면 §3.5 원인 제거).
-5. **회수·반영** — 현재 프로젝트의 **`.insane-review/response_*.md`**를 읽고, **GPT-5.5 Pro의 의견임을 명시**해
-   반영하고 너의 판단(동의/이견)을 덧붙인다.
+5. **회수·반영** — 현재 프로젝트의 **`.insane-review/response_*.md`**를 읽고, **GPT Pro의 의견임을 명시**해
+   반영하고 너의 판단(동의/이견)을 덧붙인다. 모델명은 리포트 상단 `- 모델:` 라인(실제 검증된 이름)을 그대로 인용한다.
 
 > **채팅 정리(기본 on):** 매 실행은 일반 채팅 목록 대신 **현재 폴더명과 같은 ChatGPT 프로젝트** 안에 정리된다(폴더당 프로젝트 1개, 캐시 재사용·자동 생성·실패 시 일반채팅 폴백). 채팅이 일반 목록에 쌓이는 걸 막는다. 이름은 `--project "<이름>"`, 끄려면 `--no-project`.
 
