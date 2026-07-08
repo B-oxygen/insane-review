@@ -504,6 +504,38 @@ def ensure_browser(browser_arg: str | None) -> bool:
     return launch_browser_exe(resolved[1], resolved[0])
 
 
+# 실행 중 브라우저가 디스크에서 자동 업데이트되면(스테일 인스턴스) CDP 연결이 이 에러로 깨진다.
+# 실측(2026-07-09, Chrome 150.46 실행 중 + 디스크 150.101): connect_over_cdp가 아래 메시지로 실패.
+_STALE_CDP_MARKERS = ("Browser context management is not supported",)
+
+
+def _restart_profile_browser() -> bool:
+    """전용 프로필 브라우저를 재기동(쿠키는 디스크 보존 → 로그인 유지)."""
+    saved = _load_config().get("browser")
+    r = resolve_browser(saved) if saved else resolve_browser(None)
+    if not r:
+        return False
+    _kill_profile_browsers(profile_dir_for(r[0]))
+    time.sleep(3)
+    return launch_browser_exe(r[1], r[0])
+
+
+def connect_cdp(pw):
+    """connect_over_cdp + 스테일 브라우저 자동 복구.
+    브라우저가 떠 있는 동안 자동 업데이트되면 CDP가 깨진다(위 마커). 이때 전용 프로필
+    프로세스만 재기동(로그인 보존)하고 1회 재연결 — 사용자에게 '로그인 풀림'으로 보이던
+    상황의 상당수가 이 스테일 케이스다."""
+    try:
+        return pw.chromium.connect_over_cdp(CDP_URL)
+    except Exception as exc:
+        if not any(m in str(exc) for m in _STALE_CDP_MARKERS):
+            raise
+        print("  ♻️  CDP 연결 실패(스테일 브라우저 — 실행 중 자동업데이트 추정) → 전용 브라우저 재기동(로그인 보존)")
+        if not _restart_profile_browser():
+            raise
+        return pw.chromium.connect_over_cdp(CDP_URL)
+
+
 def _cookie_state(ctx) -> tuple[str, str]:
     """세션 쿠키(__Secure-next-auth.session-token*)의 존재·만료를 확인.
     반환: (state, expiry) — state ∈ 'ok' | 'expired' | 'missing' | 'unknown'.
@@ -538,7 +570,7 @@ def probe_login() -> dict:
     try:
         from playwright.sync_api import sync_playwright as _spw
         with _spw() as pw:
-            b = pw.chromium.connect_over_cdp(CDP_URL)
+            b = connect_cdp(pw)
             ctx = pick_context(b)
             if ctx is None:
                 res["login"], res["cookie"] = "no", "missing"
@@ -1523,7 +1555,7 @@ def main():
             time.sleep(3)
         try:
             with sync_playwright() as pw:
-                browser = pw.chromium.connect_over_cdp(CDP_URL)
+                browser = connect_cdp(pw)
                 ctx = pick_context(browser)
                 if ctx is None:
                     raise RuntimeError("브라우저 context 없음 (로그인된 Comet/Chrome 필요)")
