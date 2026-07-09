@@ -6,9 +6,9 @@
   <img src="assets/hero.png" width="860" alt="insane-review シネマティックヒーロー">
 </div>
 
-> **GPT-5.5 Pro に API はない。それでもこのプラグインは Claude Code の中から使う。**
+> **GPT Pro（現時点の最新フラッグシップの Pro 推論ティア — 現在は GPT-5.6 Sol）に API はない。それでもこのプラグインは Claude Code の中から使う。**
 
-GPT-5.5 Pro は ChatGPT ウェブアプリ（サブスクリプション）にしか存在しない — 公式 API がないため、Codex CLI・`omc ask`・agent-council の API プロバイダからは届かない。insane-review は**ログイン済みの ChatGPT ウェブセッションを CDP で操作**する：関連コードを repomix でパッキングして Pro に送り、レビューを回収する。**API コストはゼロ** — 手持ちの ChatGPT プランの上で動く。
+GPT Pro は ChatGPT ウェブアプリ（サブスクリプション）にしか存在しない — 公式 API がないため、Codex CLI・`omc ask`・agent-council の API プロバイダからは届かない。insane-review は**ログイン済みの ChatGPT ウェブセッションを CDP で操作**する：関連コードを repomix でパッキングして Pro に送り、レビューを回収する。**API コストはゼロ** — 手持ちの ChatGPT プランの上で動く。
 
 [クイックスタート](#クイックスタート) • [なぜ insane-review？](#なぜ-insane-review) • [動作の仕組み](#動作の仕組み) • [機能](#機能) • [チューニングとタイムアウト](#チューニングとタイムアウト) • [動作要件](#動作要件)
 
@@ -37,7 +37,7 @@ GPT-5.5 Pro は ChatGPT ウェブアプリ（サブスクリプション）に�
 Pro はウェブ専用のため、insane-review にはデバッグポートで起動したログイン済みの実ブラウザが必要です：
 
 ```bash
-# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick GPT-5.5 Pro
+# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick the Pro reasoning tier
 open -a Comet --args --remote-debugging-port=9222
 
 # verify everything is wired up (node/repomix, playwright, pyperclip, CDP browser)
@@ -50,7 +50,7 @@ python3 bin/pack_and_ask.py --check-env
 /insane-review review the auth flow in src/auth
 ```
 
-または「Pro にこれをレビューさせて」「この設計について GPT-5.5 Pro に聞いて」と自然に言うだけ — 対象の特定とパッキングは Claude がやります。
+または「Pro にこれをレビューさせて」「この設計について GPT Pro に聞いて」と自然に言うだけ — 対象の特定とパッキングは Claude がやります。
 
 ---
 
@@ -74,7 +74,7 @@ Claude selects the COMPLETE relevant file set (full code — no --compress for r
 repomix pack  (line numbers · secretlint · packed-file-list audit · token count)
   ↓
 CDP-attach the logged-in ChatGPT session
-Select GPT-5.5 + Pro effort  → re-open menu and VERIFY (mismatch = abort, fail-closed)
+Select Pro effort (flagship auto-follows; currently GPT-5.6 Sol)  → re-open menu and VERIFY (mismatch = abort, fail-closed)
   ↓
 Attach pack + prompt  → confirm the prompt actually landed in the composer  → send
   ↓
@@ -100,8 +100,8 @@ Harvest the answer → save to  ./.insane-review/response_*.md  (atomic write)
 
 | コマンド | 動作 |
 |---------|------|
-| `/insane-review [target/question]` | 関連コードをパッキングして GPT-5.5 Pro にレビューを依頼 |
-| 自然言語 | 「Pro にこれをレビューさせて」「X について GPT-5.5 Pro に聞いて」 — 同じフロー |
+| `/insane-review [target/question]` | 関連コードをパッキングして GPT Pro にレビューを依頼 |
+| 自然言語 | 「Pro にこれをレビューさせて」「X について GPT Pro に聞いて」 — 同じフロー |
 
 ### 2 つのモード
 
@@ -115,7 +115,7 @@ Harvest the answer → save to  ./.insane-review/response_*.md  (atomic write)
 | `--target <dir>` | パッキングするフォルダ（省略時はプロンプトのみの意見モード） |
 | `--include <glob>` / `--ignore <glob>` | パッキング範囲を絞る |
 | `--model pro` | 推論エフォートを選択（例：Pro） |
-| `--require-model "GPT-5.5"` | アクティブなモデル名を検証 — 不一致なら送信を中止（fail-closed） |
+| `--require-model "GPT-5.6"` | アクティブなモデル名を検証 — 不一致なら送信を中止（fail-closed） |
 | `--prompt "..."` / `--prompt-file` | 質問 |
 | `--pack-only` | パッキングのみ（トークン数の確認）、送信しない |
 | `--council` | council モード — 応答は stdout、ログは stderr |
@@ -153,7 +153,7 @@ Harvest the answer → save to  ./.insane-review/response_*.md  (atomic write)
 ```bash
 # example: give Pro up to 25 minutes, but cut reasoning at 5 minutes if it's still thinking
 INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
-  --target . --include "src/**" --model pro --require-model "GPT-5.5" \
+  --target . --include "src/**" --model pro --require-model "GPT-5.6" \
   --force-answer-after 300 --prompt "Where are the concurrency bugs?"
 ```
 
@@ -166,7 +166,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 - [Claude Code](https://docs.anthropic.com/claude-code)
 - Python 3.11+ と `playwright`・`pyperclip`
 - Node.js / `npx`
-- **GPT-5.5 Pro が使えるサブスクリプション ChatGPT アカウント**。デバッグポート（`--remote-debugging-port=9222`）で起動した Comet/Chrome 内でログイン済みであること
+- **GPT Pro が使えるサブスクリプション ChatGPT アカウント**。デバッグポート（`--remote-debugging-port=9222`）で起動した Comet/Chrome 内でログイン済みであること
 
 ### 自動処理されるもの vs. 自分でやること
 
@@ -174,7 +174,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 |------------|-------------------|
 | **repomix** | **完全自動** — `npx -y repomix@<pinned>` で必要時に取得。手動インストールは一切不要 |
 | **playwright / pyperclip** | 初回使用時に `--check-env` でチェック。`--install` でインストール（`pip install` を実行）。未導入のまま通常実行すると、途中で壊れる代わりに明確な指示を出して停止する（fail-closed） |
-| **ブラウザログイン + GPT-5.5 Pro** | **手動** — 自動化不可。`chatgpt.com` へのログインと Pro の選択を 1 回だけ行う |
+| **ブラウザログイン + GPT Pro** | **手動** — 自動化不可。`chatgpt.com` へのログインと Pro の選択を 1 回だけ行う |
 
 ```bash
 # one shot: checks node/repomix, playwright, pyperclip, CDP browser — and installs the pip deps if missing

@@ -6,9 +6,9 @@ English | [한국어](README.ko.md) | [中文](README.zh.md) | [日本語](READM
   <img src="assets/hero.png" width="860" alt="insane-review cinematic hero">
 </div>
 
-> **GPT-5.5 Pro has no API. This plugin uses it from inside Claude Code anyway.**
+> **GPT Pro (the Pro reasoning tier of the current flagship — currently GPT-5.6 Sol) has no API. This plugin uses it from inside Claude Code anyway.**
 
-GPT-5.5 Pro lives only in the ChatGPT web app (subscription) — there is no official API, so you can't reach it from Codex CLI, `omc ask`, or an agent-council API provider. insane-review drives your **logged-in ChatGPT web session over CDP**: it packs the relevant code with repomix, sends it to Pro, and harvests the review. **Zero API cost** — it runs on your existing ChatGPT plan.
+GPT Pro lives only in the ChatGPT web app (subscription) — there is no official API, so you can't reach it from Codex CLI, `omc ask`, or an agent-council API provider. insane-review drives your **logged-in ChatGPT web session over CDP**: it packs the relevant code with repomix, sends it to Pro, and harvests the review. **Zero API cost** — it runs on your existing ChatGPT plan.
 
 [Quick Start](#quick-start) • [Why insane-review?](#why-insane-review) • [How it works](#how-it-works) • [Features](#features) • [Tuning & timeouts](#tuning--timeouts) • [Requirements](#requirements)
 
@@ -37,7 +37,7 @@ Required for the plugin to load.
 Pro is web-only, so insane-review needs a real, logged-in browser on a debug port:
 
 ```bash
-# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick GPT-5.5 Pro
+# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick the Pro reasoning tier
 open -a Comet --args --remote-debugging-port=9222
 
 # verify everything is wired up (node/repomix, playwright, pyperclip, CDP browser)
@@ -50,7 +50,7 @@ python3 bin/pack_and_ask.py --check-env
 /insane-review review the auth flow in src/auth
 ```
 
-Or just say "have Pro review this" / "ask GPT-5.5 Pro about this design" — Claude figures out the target and packs it.
+Or just say "have Pro review this" / "ask GPT Pro about this design" — Claude figures out the target and packs it.
 
 ---
 
@@ -74,7 +74,7 @@ Claude selects the COMPLETE relevant file set (full code — no --compress for r
 repomix pack  (line numbers · secretlint · packed-file-list audit · token count)
   ↓
 CDP-attach the logged-in ChatGPT session
-Select GPT-5.5 + Pro effort  → re-open menu and VERIFY (mismatch = abort, fail-closed)
+Select Pro effort (flagship auto-follows; currently GPT-5.6 Sol)  → re-open menu and VERIFY (mismatch = abort, fail-closed)
   ↓
 Attach pack + prompt  → confirm the prompt actually landed in the composer  → send
   ↓
@@ -100,8 +100,8 @@ Output lands in the **current project's** `.insane-review/` folder (like kkirikk
 
 | Command | What it does |
 |---------|-------------|
-| `/insane-review [target/question]` | Pack the relevant code and send it to GPT-5.5 Pro for review |
-| natural language | "have Pro review this", "ask GPT-5.5 Pro about X" — same flow |
+| `/insane-review [target/question]` | Pack the relevant code and send it to GPT Pro for review |
+| natural language | "have Pro review this", "ask GPT Pro about X" — same flow |
 
 ### Two modes
 
@@ -115,7 +115,7 @@ Output lands in the **current project's** `.insane-review/` folder (like kkirikk
 | `--target <dir>` | Folder to pack (omit for a prompt-only opinion) |
 | `--include <glob>` / `--ignore <glob>` | Narrow the packed set |
 | `--model pro` | Select the reasoning effort (e.g. Pro) |
-| `--require-model "GPT-5.5"` | Verify the active model name — abort send on mismatch (fail-closed) |
+| `--require-model "GPT-5.6"` | Verify the active model name — abort send on mismatch (fail-closed) |
 | `--prompt "..."` / `--prompt-file` | The question |
 | `--pack-only` | Just pack (inspect token count), don't send |
 | `--council` | Council mode — response on stdout, logs on stderr |
@@ -153,7 +153,7 @@ Other environment overrides:
 ```bash
 # example: give Pro up to 25 minutes, but cut reasoning at 5 minutes if it's still thinking
 INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
-  --target . --include "src/**" --model pro --require-model "GPT-5.5" \
+  --target . --include "src/**" --model pro --require-model "GPT-5.6" \
   --force-answer-after 300 --prompt "Where are the concurrency bugs?"
 ```
 
@@ -166,7 +166,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 - [Claude Code](https://docs.anthropic.com/claude-code)
 - Python 3.11+ with `playwright` and `pyperclip`
 - Node.js / `npx`
-- **A subscription ChatGPT account with GPT-5.5 Pro**, logged in inside Comet/Chrome launched on the debug port (`--remote-debugging-port=9222`)
+- **A subscription ChatGPT account with GPT Pro**, logged in inside Comet/Chrome launched on the debug port (`--remote-debugging-port=9222`)
 
 ### What's auto-handled vs. what you do
 
@@ -174,7 +174,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 |------------|-------------------|
 | **repomix** | **Fully automatic** — pulled on demand via `npx -y repomix@<pinned>`, never needs manual install |
 | **playwright / pyperclip** | Checked on first use by `--check-env`; install them with `--install` (runs `pip install`). A normal run without them stops with a clear instruction (fail-closed) rather than failing mid-way |
-| **Browser login + GPT-5.5 Pro** | **Manual** — can't be automated; you log into `chatgpt.com` and select Pro once |
+| **Browser login + GPT Pro** | **Manual** — can't be automated; you log into `chatgpt.com` and select Pro once |
 
 ```bash
 # one shot: checks node/repomix, playwright, pyperclip, CDP browser — and installs the pip deps if missing

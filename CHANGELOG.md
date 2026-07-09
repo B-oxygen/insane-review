@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.7 — 2026-07-10
+
+플래그십 교체(GPT-5.5 → **GPT-5.6 Sol**) 실측 반영 — 코어 Pro-티어 자동 추종은 그대로 동작함을 라이브 E2E로 확인.
+
+- **실측(2026-07-10)**: 모델 스위처 = 추론단계 radio(즉시·중간·높음·매우 높음·Pro) + **모델 서브메뉴**("GPT-5.6 Sol" 트리거 → GPT-5.6 Sol/GPT-5.5/GPT-5.4[7/23 종료]/GPT-5.3/o3). Pro 티어는 GPT-5.6 Sol에서 그대로 존재·선택됨. E2E: `--model pro --require-model "GPT-5.6"` → 검증 OK·응답 회수 확인.
+- **`read_menu_state` 하드닝**: 모델 서브메뉴가 펼쳐진 상태에선 모델 radio(예: 'GPT-5.6 Sol')도 `menuitemradio`+checked라 추론단계 판정(`effort_checked`)을 덮어쓰던 오염 수정 — 모델명 패턴은 effort 후보에서 제외(실측 재현 후 수정 검증).
+- **문서 현행화**: README 5종·council-setup.md의 "GPT-5.5 Pro" → 제네릭 "GPT Pro"(현 플래그십 예시 GPT-5.6 Sol), `--require-model` 예시 "GPT-5.5" → "GPT-5.6"(부분 일치로 "GPT-5.6 Sol"에 매칭). council-setup에 require-model 고정 핀의 fail-closed 함정 경고 추가.
+
 ## 0.5.6 — 2026-07-09
 
 "CDP가 자꾸 풀려 재로그인 반복" 원인 조사 후속 — 스테일 브라우저 자동 복구.

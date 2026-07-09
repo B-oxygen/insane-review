@@ -6,9 +6,9 @@
   <img src="assets/hero.png" width="860" alt="insane-review 시네마틱 히어로">
 </div>
 
-> **GPT-5.5 Pro는 API가 없다. 그래도 Claude Code 안에서 쓴다.**
+> **GPT Pro(현 시점 최신 플래그십의 Pro 추론 단계 — 현재 GPT-5.6 Sol)는 API가 없다. 그래도 Claude Code 안에서 쓴다.**
 
-GPT-5.5 Pro는 ChatGPT 웹(구독)에서만 쓸 수 있고 **공식 API가 없다.** Codex CLI·`omc ask`·agent-council의 API provider로는 못 부른다. insane-review는 **로그인된 ChatGPT 웹 세션을 CDP로 자동화**한다 — repomix로 관련 코드만 패킹해 Pro에 투입하고 분석을 회수한다. **API 비용 0**, 당신의 ChatGPT 요금제로 동작한다.
+GPT Pro는 ChatGPT 웹(구독)에서만 쓸 수 있고 **공식 API가 없다.** Codex CLI·`omc ask`·agent-council의 API provider로는 못 부른다. insane-review는 **로그인된 ChatGPT 웹 세션을 CDP로 자동화**한다 — repomix로 관련 코드만 패킹해 Pro에 투입하고 분석을 회수한다. **API 비용 0**, 당신의 ChatGPT 요금제로 동작한다.
 
 [빠른 시작](#빠른-시작) • [왜?](#왜-insane-review) • [동작 방식](#동작-방식) • [기능](#기능) • [타임아웃 조정](#타임아웃--튜닝) • [선행 조건](#선행-조건)
 
@@ -37,7 +37,7 @@ GPT-5.5 Pro는 ChatGPT 웹(구독)에서만 쓸 수 있고 **공식 API가 없�
 Pro는 웹 전용이라 디버그포트로 로그인된 브라우저가 필요하다:
 
 ```bash
-# Comet(또는 Chrome)을 CDP 포트로 띄우고 → chatgpt.com 로그인 → GPT-5.5 Pro 선택
+# Comet(또는 Chrome)을 CDP 포트로 띄우고 → chatgpt.com 로그인 → Pro 추론 단계 선택
 open -a Comet --args --remote-debugging-port=9222
 
 # 환경 점검(node/repomix, playwright, pyperclip, CDP 브라우저). --install이면 pip 의존성 자동설치
@@ -50,7 +50,7 @@ python3 bin/pack_and_ask.py --check-env --install
 /insane-review src/auth 인증 흐름 검토해줘
 ```
 
-또는 자연어로 "Pro한테 이거 리뷰시켜줘" / "GPT-5.5 Pro 의견 받아와" — Claude가 타겟을 정해 패킹한다.
+또는 자연어로 "Pro한테 이거 리뷰시켜줘" / "GPT Pro 의견 받아와" — Claude가 타겟을 정해 패킹한다.
 
 ---
 
@@ -74,7 +74,7 @@ Claude가 '완전한 관련 파일 집합'을 선별 (풀코드 — 리뷰엔 --
 repomix 패킹  (라인번호 · secretlint · 패킹파일 감사 · 토큰 수)
   ↓
 로그인된 ChatGPT 세션에 CDP attach
-GPT-5.5 + Pro 추론단계 선택  → 메뉴 재오픈해 검증 (불일치=중단, fail-closed)
+Pro 추론단계 선택 (플래그십 자동 추종; 현재 GPT-5.6 Sol)  → 메뉴 재오픈해 검증 (불일치=중단, fail-closed)
   ↓
 pack 첨부 + 프롬프트  → 프롬프트가 입력창에 실제로 들어갔는지 확인  → 전송
   ↓
@@ -100,8 +100,8 @@ pack 첨부 + 프롬프트  → 프롬프트가 입력창에 실제로 들어갔
 
 | 커맨드 | 동작 |
 |--------|------|
-| `/insane-review [대상/질문]` | 관련 코드를 패킹해 GPT-5.5 Pro에 리뷰 요청 |
-| 자연어 | "Pro한테 리뷰시켜줘", "GPT-5.5 Pro 의견 받아와" — 동일 흐름 |
+| `/insane-review [대상/질문]` | 관련 코드를 패킹해 GPT Pro에 리뷰 요청 |
+| 자연어 | "Pro한테 리뷰시켜줘", "GPT Pro 의견 받아와" — 동일 흐름 |
 
 ### 두 가지 모드
 
@@ -115,7 +115,7 @@ pack 첨부 + 프롬프트  → 프롬프트가 입력창에 실제로 들어갔
 | `--target <dir>` | 패킹할 폴더(생략 시 질문만 = 의견 모드) |
 | `--include <glob>` / `--ignore <glob>` | 패킹 범위 좁히기 |
 | `--model pro` | 추론단계 선택(예: Pro) |
-| `--require-model "GPT-5.5"` | 활성 모델명 검증 — 불일치 시 전송 중단(fail-closed) |
+| `--require-model "GPT-5.6"` | 활성 모델명 검증 — 불일치 시 전송 중단(fail-closed) |
 | `--prompt "..."` / `--prompt-file` | 질문 |
 | `--pack-only` | 패킹만(토큰 확인), 전송 안 함 |
 | `--council` | council 모드 — 응답만 stdout, 로그는 stderr |
@@ -153,7 +153,7 @@ Pro 완전추론은 10~15분이 걸릴 수 있어, 응답 대기·패킹 타임�
 ```bash
 # 예: Pro에 최대 25분 주되, 5분까지도 추론 중이면 거기서 끊어 답변 받기
 INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
-  --target . --include "src/**" --model pro --require-model "GPT-5.5" \
+  --target . --include "src/**" --model pro --require-model "GPT-5.6" \
   --force-answer-after 300 --prompt "동시성 버그 어디 있어?"
 ```
 
@@ -166,7 +166,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 - [Claude Code](https://docs.anthropic.com/claude-code)
 - Python 3.11+ + `playwright`, `pyperclip`
 - Node.js / `npx`
-- **GPT-5.5 Pro 구독 ChatGPT 계정**, 디버그포트(`--remote-debugging-port=9222`)로 띄운 Comet/Chrome에 로그인된 상태
+- **GPT Pro 구독 ChatGPT 계정**, 디버그포트(`--remote-debugging-port=9222`)로 띄운 Comet/Chrome에 로그인된 상태
 
 ### 자동 처리 vs. 직접
 
@@ -174,7 +174,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 |--------|-------------|
 | **repomix** | **완전 자동** — `npx -y repomix@<핀>`으로 필요 시 받아옴, 사전설치 불필요 |
 | **playwright / pyperclip** | 첫 사용 시 `--check-env`로 점검, `--install`로 설치(`pip install`). 없는 채 일반 실행하면 중간에 깨지지 않고 안내하며 멈춤(fail-closed) |
-| **브라우저 로그인 + GPT-5.5 Pro** | **수동** — 자동화 불가. `chatgpt.com` 로그인 + Pro 선택을 1회 직접 |
+| **브라우저 로그인 + GPT Pro** | **수동** — 자동화 불가. `chatgpt.com` 로그인 + Pro 선택을 1회 직접 |
 
 ```bash
 # 한 번에: node/repomix·playwright·pyperclip·CDP 브라우저 점검 + 부족한 pip 의존성 설치

@@ -777,7 +777,9 @@ MODEL_SWITCHER_SELECTORS = [
     'button[data-testid="model-switcher-dropdown-button"]',
     'button[aria-label*="model" i]',
 ]
-# 실측: pill 클릭 → menuitemradio(즉시/중간/높음/매우 높음/Pro=추론단계) + menuitem("GPT-5.5"=모델명)
+# 실측(2026-07-10): pill 클릭 → menuitemradio(즉시/중간/높음/매우 높음/Pro=추론단계)
+#   + menuitem("GPT-5.6 Sol"=모델 서브메뉴 트리거). 트리거를 hover하면 모델 radio들
+#   (GPT-5.6 Sol/GPT-5.5/GPT-5.4/GPT-5.3/o3)이 같은 메뉴 DOM에 menuitemradio로 추가된다.
 EFFORT_ITEM_SELECTORS = ['[role="menuitemradio"]', '[role="menuitem"]', '[role="option"]']
 
 
@@ -831,6 +833,10 @@ def read_menu_state(page) -> dict:
         for it in page.query_selector_all('[role="menuitemradio"]'):
             t = (it.inner_text() or "").strip()
             state["items"].append(t)
+            # 모델 서브메뉴가 펼쳐져 있으면 모델 radio(예: 'GPT-5.6 Sol')도 menuitemradio+checked로
+            # 잡혀 추론단계 판정을 덮어쓴다 — 모델명 패턴은 effort 후보에서 제외.
+            if re.search(r"GPT|gpt|o\d|Claude|Gemini", t):
+                continue
             if it.get_attribute("aria-checked") == "true":
                 state["effort_checked"] = t
     except Exception:
@@ -840,7 +846,7 @@ def read_menu_state(page) -> dict:
 
 def select_model(page, want: str, require_model: str | None = None) -> tuple[bool, str | None]:
     """모델 스위처를 열고 want(추론단계, 예: 'pro')를 선택 + 검증.
-    require_model 지정 시 모델명(예: 'GPT-5.5')이 일치하지 않으면 False(실패) 반환.
+    require_model 지정 시 모델명(예: 'GPT-5.6')이 일치하지 않으면 False(실패) 반환.
     반환: (verified, verified_model_name)"""
     want_l = want.lower()
     if not _open_switcher(page):
@@ -1398,7 +1404,7 @@ def main():
     ap.add_argument("--prompt-file", default=None)
     ap.add_argument("--model", default=None, help='추론단계 선택(예: "pro")')
     ap.add_argument("--require-model", default=None,
-                    help='모델명 검증(예: "GPT-5.5") — 불일치 시 전송 중단')
+                    help='모델명 검증(예: "GPT-5.6") — 불일치 시 전송 중단')
     ap.add_argument("--force-answer-after", type=int, default=None,
                     help="N초 후 리즈닝 중이면 '지금 답변 받기' 재시도")
     ap.add_argument("--max-wait", type=int, default=None,
@@ -1470,7 +1476,7 @@ def main():
     # 스킵되는 fail-open을 차단(fail-closed). 모델/추론단계를 함께 지정해야 검증이 돈다.
     if args.require_model and not args.model:
         sys.exit('❌ --require-model은 --model과 함께 써야 합니다(모델/추론단계를 선택·검증하는 경로).\n'
-                 '     예: --model pro --require-model "GPT-5.5"')
+                 '     예: --model pro --require-model "GPT-5.6"')
 
     real_stdout = sys.stdout
     if args.council:

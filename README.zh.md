@@ -6,9 +6,9 @@
   <img src="assets/hero.png" width="860" alt="insane-review 电影感主视觉">
 </div>
 
-> **GPT-5.5 Pro 没有 API。这个插件照样让你在 Claude Code 里用上它。**
+> **GPT Pro（当前旗舰模型的 Pro 推理档位 — 目前是 GPT-5.6 Sol）没有 API。这个插件照样让你在 Claude Code 里用上它。**
 
-GPT-5.5 Pro 只存在于 ChatGPT 网页版（订阅）中 — 没有官方 API，所以 Codex CLI、`omc ask`、agent-council 的 API provider 都够不着它。insane-review **通过 CDP 驱动你已登录的 ChatGPT 网页会话**：用 repomix 打包相关代码，发给 Pro，再把评审收回来。**API 成本为零** — 它跑在你现有的 ChatGPT 订阅上。
+GPT Pro 只存在于 ChatGPT 网页版（订阅）中 — 没有官方 API，所以 Codex CLI、`omc ask`、agent-council 的 API provider 都够不着它。insane-review **通过 CDP 驱动你已登录的 ChatGPT 网页会话**：用 repomix 打包相关代码，发给 Pro，再把评审收回来。**API 成本为零** — 它跑在你现有的 ChatGPT 订阅上。
 
 [快速开始](#快速开始) • [为什么选 insane-review](#为什么选-insane-review) • [工作原理](#工作原理) • [功能](#功能) • [调优与超时](#调优与超时) • [前置条件](#前置条件)
 
@@ -37,7 +37,7 @@ GPT-5.5 Pro 只存在于 ChatGPT 网页版（订阅）中 — 没有官方 API�
 Pro 只能在网页上用，因此 insane-review 需要一个开着调试端口、已登录的真实浏览器：
 
 ```bash
-# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick GPT-5.5 Pro
+# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick the Pro reasoning tier
 open -a Comet --args --remote-debugging-port=9222
 
 # verify everything is wired up (node/repomix, playwright, pyperclip, CDP browser)
@@ -50,7 +50,7 @@ python3 bin/pack_and_ask.py --check-env
 /insane-review review the auth flow in src/auth
 ```
 
-或者直接说"让 Pro 评审一下这个"/"就这个设计问问 GPT-5.5 Pro" — Claude 会自行确定目标并打包。
+或者直接说"让 Pro 评审一下这个"/"就这个设计问问 GPT Pro" — Claude 会自行确定目标并打包。
 
 ---
 
@@ -74,7 +74,7 @@ Claude selects the COMPLETE relevant file set (full code — no --compress for r
 repomix pack  (line numbers · secretlint · packed-file-list audit · token count)
   ↓
 CDP-attach the logged-in ChatGPT session
-Select GPT-5.5 + Pro effort  → re-open menu and VERIFY (mismatch = abort, fail-closed)
+Select Pro effort (flagship auto-follows; currently GPT-5.6 Sol)  → re-open menu and VERIFY (mismatch = abort, fail-closed)
   ↓
 Attach pack + prompt  → confirm the prompt actually landed in the composer  → send
   ↓
@@ -100,8 +100,8 @@ Harvest the answer → save to  ./.insane-review/response_*.md  (atomic write)
 
 | 命令 | 作用 |
 |---------|------|
-| `/insane-review [target/question]` | 打包相关代码并发给 GPT-5.5 Pro 评审 |
-| 自然语言 | "让 Pro 评审一下这个"、"就 X 问问 GPT-5.5 Pro" — 同一流程 |
+| `/insane-review [target/question]` | 打包相关代码并发给 GPT Pro 评审 |
+| 自然语言 | "让 Pro 评审一下这个"、"就 X 问问 GPT Pro" — 同一流程 |
 
 ### 两种模式
 
@@ -115,7 +115,7 @@ Harvest the answer → save to  ./.insane-review/response_*.md  (atomic write)
 | `--target <dir>` | 要打包的文件夹（省略则为纯提问的意见模式） |
 | `--include <glob>` / `--ignore <glob>` | 收窄打包范围 |
 | `--model pro` | 选择推理力度（如 Pro） |
-| `--require-model "GPT-5.5"` | 校验当前激活的模型名 — 不匹配即中止发送（fail-closed） |
+| `--require-model "GPT-5.6"` | 校验当前激活的模型名 — 不匹配即中止发送（fail-closed） |
 | `--prompt "..."` / `--prompt-file` | 问题 |
 | `--pack-only` | 只打包（查看 token 数），不发送 |
 | `--council` | council 模式 — 响应走 stdout，日志走 stderr |
@@ -153,7 +153,7 @@ Harvest the answer → save to  ./.insane-review/response_*.md  (atomic write)
 ```bash
 # example: give Pro up to 25 minutes, but cut reasoning at 5 minutes if it's still thinking
 INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
-  --target . --include "src/**" --model pro --require-model "GPT-5.5" \
+  --target . --include "src/**" --model pro --require-model "GPT-5.6" \
   --force-answer-after 300 --prompt "Where are the concurrency bugs?"
 ```
 
@@ -166,7 +166,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 - [Claude Code](https://docs.anthropic.com/claude-code)
 - Python 3.11+，装有 `playwright` 和 `pyperclip`
 - Node.js / `npx`
-- **一个订阅了 GPT-5.5 Pro 的 ChatGPT 账号**，并已在以调试端口（`--remote-debugging-port=9222`）启动的 Comet/Chrome 中登录
+- **一个订阅了 GPT Pro 的 ChatGPT 账号**，并已在以调试端口（`--remote-debugging-port=9222`）启动的 Comet/Chrome 中登录
 
 ### 自动处理的部分 vs. 需要你做的部分
 
@@ -174,7 +174,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 |------------|-------------------|
 | **repomix** | **完全自动** — 按需通过 `npx -y repomix@<pinned>` 拉取，永远不需要手动安装 |
 | **playwright / pyperclip** | 首次使用时由 `--check-env` 检查；用 `--install` 安装（执行 `pip install`）。缺依赖时正常运行不会中途崩溃，而是给出明确指引后停止（fail-closed） |
-| **浏览器登录 + GPT-5.5 Pro** | **手动** — 无法自动化；你需要登录 `chatgpt.com` 并选择 Pro，仅此一次 |
+| **浏览器登录 + GPT Pro** | **手动** — 无法自动化；你需要登录 `chatgpt.com` 并选择 Pro，仅此一次 |
 
 ```bash
 # one shot: checks node/repomix, playwright, pyperclip, CDP browser — and installs the pip deps if missing

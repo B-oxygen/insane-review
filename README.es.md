@@ -6,9 +6,9 @@
   <img src="assets/hero.png" width="860" alt="héroe cinematográfico de insane-review">
 </div>
 
-> **GPT-5.5 Pro no tiene API. Este plugin lo usa igualmente desde dentro de Claude Code.**
+> **GPT Pro (el nivel de razonamiento Pro del buque insignia actual — actualmente GPT-5.6 Sol) no tiene API. Este plugin lo usa igualmente desde dentro de Claude Code.**
 
-GPT-5.5 Pro solo vive en la aplicación web de ChatGPT (suscripción) — no existe una API oficial, así que no puedes alcanzarlo desde Codex CLI, `omc ask` ni un proveedor de API de agent-council. insane-review controla **tu sesión web de ChatGPT ya iniciada a través de CDP**: empaqueta el código relevante con repomix, se lo envía a Pro y recoge la revisión. **Coste de API cero** — funciona sobre tu plan de ChatGPT existente.
+GPT Pro solo vive en la aplicación web de ChatGPT (suscripción) — no existe una API oficial, así que no puedes alcanzarlo desde Codex CLI, `omc ask` ni un proveedor de API de agent-council. insane-review controla **tu sesión web de ChatGPT ya iniciada a través de CDP**: empaqueta el código relevante con repomix, se lo envía a Pro y recoge la revisión. **Coste de API cero** — funciona sobre tu plan de ChatGPT existente.
 
 [Inicio rápido](#inicio-rápido) • [¿Por qué insane-review?](#por-qué-insane-review) • [Cómo funciona](#cómo-funciona) • [Funciones](#funciones) • [Ajustes y tiempos de espera](#ajustes-y-tiempos-de-espera) • [Requisitos](#requisitos)
 
@@ -37,7 +37,7 @@ Necesario para que el plugin se cargue.
 Pro es solo web, así que insane-review necesita un navegador real, con sesión iniciada, en un puerto de depuración:
 
 ```bash
-# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick GPT-5.5 Pro
+# launch Comet (or Chrome) with the CDP port, then log into chatgpt.com and pick the Pro reasoning tier
 open -a Comet --args --remote-debugging-port=9222
 
 # verify everything is wired up (node/repomix, playwright, pyperclip, CDP browser)
@@ -50,7 +50,7 @@ python3 bin/pack_and_ask.py --check-env
 /insane-review review the auth flow in src/auth
 ```
 
-O simplemente di "que Pro revise esto" / "pregunta a GPT-5.5 Pro sobre este diseño" — Claude identifica el objetivo y lo empaqueta.
+O simplemente di "que Pro revise esto" / "pregunta a GPT Pro sobre este diseño" — Claude identifica el objetivo y lo empaqueta.
 
 ---
 
@@ -74,7 +74,7 @@ Claude selects the COMPLETE relevant file set (full code — no --compress for r
 repomix pack  (line numbers · secretlint · packed-file-list audit · token count)
   ↓
 CDP-attach the logged-in ChatGPT session
-Select GPT-5.5 + Pro effort  → re-open menu and VERIFY (mismatch = abort, fail-closed)
+Select Pro effort (flagship auto-follows; currently GPT-5.6 Sol)  → re-open menu and VERIFY (mismatch = abort, fail-closed)
   ↓
 Attach pack + prompt  → confirm the prompt actually landed in the composer  → send
   ↓
@@ -100,8 +100,8 @@ La salida se guarda en la carpeta `.insane-review/` del **proyecto actual** (com
 
 | Comando | Qué hace |
 |---------|-------------|
-| `/insane-review [target/question]` | Empaqueta el código relevante y se lo envía a GPT-5.5 Pro para revisión |
-| lenguaje natural | "que Pro revise esto", "pregunta a GPT-5.5 Pro sobre X" — el mismo flujo |
+| `/insane-review [target/question]` | Empaqueta el código relevante y se lo envía a GPT Pro para revisión |
+| lenguaje natural | "que Pro revise esto", "pregunta a GPT Pro sobre X" — el mismo flujo |
 
 ### Dos modos
 
@@ -115,7 +115,7 @@ La salida se guarda en la carpeta `.insane-review/` del **proyecto actual** (com
 | `--target <dir>` | Carpeta a empaquetar (omítelo para una opinión solo con prompt) |
 | `--include <glob>` / `--ignore <glob>` | Acota el conjunto empaquetado |
 | `--model pro` | Selecciona el esfuerzo de razonamiento (p. ej. Pro) |
-| `--require-model "GPT-5.5"` | Verifica el nombre del modelo activo — aborta el envío si no coincide (fail-closed) |
+| `--require-model "GPT-5.6"` | Verifica el nombre del modelo activo — aborta el envío si no coincide (fail-closed) |
 | `--prompt "..."` / `--prompt-file` | La pregunta |
 | `--pack-only` | Solo empaqueta (inspecciona el recuento de tokens), sin enviar |
 | `--council` | Modo council — respuesta por stdout, logs por stderr |
@@ -153,7 +153,7 @@ Otras variables de entorno:
 ```bash
 # example: give Pro up to 25 minutes, but cut reasoning at 5 minutes if it's still thinking
 INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
-  --target . --include "src/**" --model pro --require-model "GPT-5.5" \
+  --target . --include "src/**" --model pro --require-model "GPT-5.6" \
   --force-answer-after 300 --prompt "Where are the concurrency bugs?"
 ```
 
@@ -166,7 +166,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 - [Claude Code](https://docs.anthropic.com/claude-code)
 - Python 3.11+ con `playwright` y `pyperclip`
 - Node.js / `npx`
-- **Una cuenta de ChatGPT por suscripción con GPT-5.5 Pro**, con sesión iniciada en un Comet/Chrome lanzado con el puerto de depuración (`--remote-debugging-port=9222`)
+- **Una cuenta de ChatGPT por suscripción con GPT Pro**, con sesión iniciada en un Comet/Chrome lanzado con el puerto de depuración (`--remote-debugging-port=9222`)
 
 ### Qué se gestiona solo vs. qué haces tú
 
@@ -174,7 +174,7 @@ INSANE_REVIEW_MAX_WAIT=1500 python3 bin/pack_and_ask.py \
 |------------|-------------------|
 | **repomix** | **Totalmente automático** — se descarga bajo demanda vía `npx -y repomix@<pinned>`, nunca requiere instalación manual |
 | **playwright / pyperclip** | Se comprueban en el primer uso con `--check-env`; instálalos con `--install` (ejecuta `pip install`). Una ejecución normal sin ellos se detiene con una instrucción clara (fail-closed) en lugar de fallar a mitad de camino |
-| **Inicio de sesión del navegador + GPT-5.5 Pro** | **Manual** — no se puede automatizar; inicias sesión en `chatgpt.com` y seleccionas Pro una vez |
+| **Inicio de sesión del navegador + GPT Pro** | **Manual** — no se puede automatizar; inicias sesión en `chatgpt.com` y seleccionas Pro una vez |
 
 ```bash
 # one shot: checks node/repomix, playwright, pyperclip, CDP browser — and installs the pip deps if missing
