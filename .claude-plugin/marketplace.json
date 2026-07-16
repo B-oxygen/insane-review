@@ -1,0 +1,23 @@
+{
+    "name": "boxygen-insane-review",
+    "owner": {
+        "name": "B-oxygen",
+        "url": "https://github.com/B-oxygen"
+    },
+    "plugins": [
+        {
+            "name": "insane-review",
+            "description": "insane-review fork (B-oxygen) — codegraph 1차 선별 단계 포함. Use GPT Pro (web-only, no API) from inside Claude Code — repomix-pack only the relevant code, send to subscription ChatGPT Pro, and harvest the review/opinion.",
+            "source": "./",
+            "category": "development",
+            "tags": [
+                "chatgpt",
+                "gpt-pro",
+                "repomix",
+                "codegraph",
+                "code-review",
+                "korean"
+            ]
+        }
+    ]
+}
