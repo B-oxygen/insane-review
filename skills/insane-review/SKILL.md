@@ -28,7 +28,14 @@ description: GPT Pro(웹 전용·API 없음 — 현 시점 최신 플래그십 �
 ### 2) 타겟 선별 — **완전한 관련 집합을 네가(Claude) 판단** (사용자가 누락을 잡아주는 구조면 안 된다)
 "repomix로 무엇을 넣을지 = 무엇이 완전한 관련 집합인지", "repomix만으로 충분한지 vs 관련 파일을 다 넣어야 하는지"의 **판단은 네 책임**이다. 기본은 **"넓게, 빠짐없이"**:
 - **단일 모듈/플러그인/기능 리뷰면 그 디렉토리를 통째로** 넣어라(`--target <dir>`, `--include` 생략 또는 광범위). 코드 한 파일만 넣으면 실행지시서·설정·통합 맥락이 빠진다(실측: `bin/**`만 넣어 3파일 → README/command/config 누락).
-- 더 넓은 범위면 지목 파일에서 **import/require·호출자·피호출자(grep/LSP `find_references`/`goto_definition`)·테스트·타입·설정**까지 추적해 집합을 *닫는다*.
+- **codegraph 인덱스가 있으면(타겟 레포 루트에 `.codegraph/` 존재) 그걸 1차 선별기로 써라** — grep/LSP 수동 추적보다 빠르고 DI·라우트 경유 호출까지 잡는다:
+  ```bash
+  codegraph impact <심볼>        # 변경 대상 심볼의 blast radius → 파일 목록 추출
+  codegraph callers <심볼>       # 호출자만
+  codegraph affected <파일...>   # 영향받는 테스트 파일
+  ```
+  출력의 파일 경로들을 모아 `--include` 글롭으로 변환한다. **주의**: ① 이벤트 흐름(emit→핸들러)은 직결 안 되니 **이벤트 클래스명으로 `impact`** 질의(예: `codegraph impact PaymentFailureEvent`), ② codegraph 목록은 *하한선* — 설정·README·마이그레이션 등 심볼 그래프 밖 파일은 별도로 추가, ③ `affected`는 파일 수 늘수록 과대 확대 경향 — 목록이 수십 개면 직접 관련만 남겨라.
+- codegraph 인덱스가 없으면 지목 파일에서 **import/require·호출자·피호출자(grep/LSP `find_references`/`goto_definition`)·테스트·타입·설정**까지 추적해 집합을 *닫는다*.
 - **패킹 후 `📦 패킹 포함 N개 파일` 감사 목록이 네가 의도한 완전한 집합을 담았는지 직접 확인**한다(§3.5). 사용자가 지적하기 전에 네가 잡아라.
 - 결과를 **정확한 파일 목록**(→ `--stdin`) 또는 **글롭**(→ `--include "src/auth/**,*.test.ts"`)으로 만든다.
 - **코드 리뷰/원인분석은 풀 코드로 보내라 — `--compress` 쓰지 마라.** 압축은 함수 본문(조건·early return·예외·루프 = 버그 판단 근거)을 제거해 리뷰 AI가 구현을 *상상*하게 만든다(실측: 본문 58% 손실 → false-positive·fail-open 폭증). 멀티 AI 합의(GPT-5.5 Pro·codex·agy·gjc)로 확정.
